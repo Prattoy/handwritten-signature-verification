@@ -6,22 +6,29 @@
    - Split your dataset into training, validation, and testing sets. The training set will be used to train the siamese network, the validation set for hyperparameter tuning, and the testing set for final evaluation.
 
 3. Siamese Network Architecture:
-   - Design the architecture of the siamese network. Typically, it consists of two identical subnetworks (twins) that share weights and are connected by a similarity/distance metric layer.
+   - Design the architecture of the Siamese network. Typically, it consists of two identical subnetworks (twins) that share weights and are connected by a similarity/distance metric layer.
    - Choose a suitable convolutional neural network (CNN) architecture (e.g., VGG, ResNet) as the backbone for the twins. The twin networks should be capable of extracting discriminative features from signature images.
 
 4. Triplet Selection and Batch Generation:
    - Implement a method to select anchor-positive-negative triplets from your training dataset. The anchor should be a genuine signature, the positive a different genuine signature, and the negative a forged or dissimilar signature.
-   - Generate batches of triplets to feed into the siamese network during training. Ensure that the batches contain a balanced mix of anchor-positive-negative triplets.
+   - Generate batches of triplets to feed into the Siamese network during training. Ensure that the batches contain a balanced mix of anchor-positive-negative triplets.
 
 5. Triplet Loss and Network Training:
    - Define the triplet loss function, which calculates the loss based on the similarity/dissimilarity of the anchor-positive-negative triplets.
-   - Train the siamese network using the triplet loss function and stochastic gradient descent (SGD) or other optimization algorithms. Monitor the training process and adjust hyperparameters (e.g., learning rate, batch size) as necessary.
+   - Train the Siamese network using the triplet loss function and stochastic gradient descent (SGD) or other optimization algorithms. Monitor the training process and adjust hyperparameters (e.g., learning rate, batch size) as necessary.
 
 6. Evaluation and Validation:
-   - Evaluate the trained siamese network on the validation set to assess its performance. Use metrics such as accuracy, precision, recall, and F1 score to measure the model's effectiveness in distinguishing genuine and forged signatures.
+   - Evaluate the trained Siamese network on the validation set to assess its performance. Use metrics such as accuracy, precision, recall, and F1 score to measure the model's effectiveness in distinguishing genuine and forged signatures.
    - Conduct iterative validation and fine-tuning steps to improve the model's performance. Experiment with different network architectures, loss functions, and hyperparameters.
 
 7. Testing and Deployment:
    - Evaluate the final trained model on the independent testing set to obtain unbiased performance metrics.
    - Once satisfied with the model's performance, deploy it for offline handwritten signature verification in real-world scenarios.
    - Develop a user-friendly interface or integrate the model into an application for easy usage.
+
+
+###Keypoints
+i. Dataset should not be used in any published papers before
+ii. Need to use a hybrid model (Siamese + ?)
+iii. Few shot
+iv. Need to use XAI (Shap)
