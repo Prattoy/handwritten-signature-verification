@@ -39,6 +39,6 @@ Throughout the work plan, it's important to document your steps, conduct thoroug
 
 ###Keypoints
 i. Dataset should not be used in any published papers before
-ii. Need to use a hybrid model (Siamese + ?)
+ii. Need to use a hybrid model (Siamese + transformer)
 iii. Few shot
 iv. Need to use XAI (Shap)
