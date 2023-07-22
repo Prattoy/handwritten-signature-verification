@@ -6,8 +6,8 @@ triplet loss, and SHAP for interpretability in the context of few-shot learning 
    - Define the scope of your few-shot signature verification project, specifying the number of examples per user for training and testing.
    - Obtain or create a few-shot dataset of handwritten signatures, simulating the scenario where only a limited number of 
    samples are available for each user.
-      i. Data Collection: Need to collect unused data with white background. These should dividable into 3 parts. One original signature(anchor), one
-         another original but different signature(positive) and one forgery signature of the original(negative).
+      i. Data Collection: Need to collect unused data with white background. These should be dividable into 3 parts. One original signature(anchor), 
+         one another original but different signature(positive) and one forgery signature of the original(negative).
 
 2. **Data Preprocessing:**
    - Preprocess the signature images to a consistent format and size. 
@@ -74,5 +74,6 @@ and iterate based on the evaluation results. Regularly validate and refine the m
 ###Keypoints
 i. Dataset should not be used in any published papers before
 ii. Need to use a hybrid model (Siamese + transformer)
-iii. Few shot
-iv. Need to use XAI (Shap)
+iii. Offline
+iv. Few shot
+v. Need to use XAI (Shap)
