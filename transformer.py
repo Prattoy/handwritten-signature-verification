@@ -2,6 +2,7 @@ import torch
 import torchvision.transforms as transforms
 from transformers import ViTFeatureExtractor, ViTModel
 
+
 def extract_embeddings(signature_images, model_path="google/vit-base-patch16-224-in21k"):
     feature_extractor = ViTFeatureExtractor.from_pretrained(model_path)
     model = ViTModel.from_pretrained(model_path)

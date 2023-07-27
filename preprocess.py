@@ -3,6 +3,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 
+
 class SignatureDataset(Dataset):
     def __init__(self, data_folder, transform=None):
         self.data_folder = data_folder
@@ -14,15 +15,18 @@ class SignatureDataset(Dataset):
 
     def __getitem__(self, idx):
         image_name = os.path.join(self.data_folder, self.image_list[idx])
-        image = Image.open(image_name)
 
-        # Convert the grayscale image to RGB
-        image = transforms.Grayscale(num_output_channels=3)(image)
+        if image_name.endswith(".png"):
+            image = Image.open(image_name)
 
-        if self.transform:
-            image = self.transform(image)
+            # Convert the grayscale image to RGB
+            image = transforms.Grayscale(num_output_channels=3)(image)
 
-        return image
+            if self.transform:
+                image = self.transform(image)
+
+            return image
+
 
 def preprocess_data(data_folder, image_size=(128, 128), batch_size=32):
     data_transform = transforms.Compose([
@@ -32,6 +36,8 @@ def preprocess_data(data_folder, image_size=(128, 128), batch_size=32):
     ])
 
     signature_dataset = SignatureDataset(data_folder, transform=data_transform)
+    # Filter out None elements from the signature_dataset
+    signature_dataset = [signatures for signatures in signature_dataset if signatures is not None]
     signature_dataloader = DataLoader(signature_dataset, batch_size=batch_size, shuffle=True)
 
     return signature_dataloader
