@@ -10,54 +10,27 @@ from torch.utils.data import DataLoader, TensorDataset
 
 
 def main():
-    data_folder = "/Users/prattoymajumder/Documents/SignaturerDatasets/Dataset_1/signatures/full_forg"
-    image_size = (256, 256)
+    data_folder_path = "/Users/prattoymajumder/Documents/test_dataset"
+    image_size = (128, 128)
     batch_size = 32
+    num_epochs = 10
+    desired_embedding_dim = 197
 
-    signature_dataloader = preprocess_data(data_folder, image_size=image_size, batch_size=batch_size)
+    signature_dataloader = preprocess_data(data_folder_path, image_size=image_size, batch_size=batch_size)
 
-    # num_batches = len(signature_dataloader)
-    # print(f"Number of batches in signature_dataloader: {num_batches}")
-
+    num_batches = len(signature_dataloader)
+    print(f"Number of batches in signature_dataloader: {num_batches}")
+    # print(signature_dataloader[0].shape())
     # to visualize if the data has been preprocessed or not
     # visualize_signature_images(signature_dataloader)
 
-    # Assuming 'signature_dataloader' contains preprocessed signature images
-    signature_embeddings_list = []
 
-    for batch_images in signature_dataloader:
-        signature_embeddings = extract_embeddings(batch_images)
-        signature_embeddings_list.append(signature_embeddings)
+    # signature_embeddings = extract_embeddings(signature_dataset)
+    # signature_embeddings_list.append(signature_embeddings)
 
-        # Create triplets and corresponding labels for training
-        triplets, labels = t.create_signature_triplets(signature_embeddings_list)
 
-        # Convert triplets and labels to tensors
-        anchor_tensors, positive_tensors, negative_tensors = zip(*triplets)
-        anchor_tensors = torch.stack(anchor_tensors)
-        positive_tensors = torch.stack(positive_tensors)
-        negative_tensors = torch.stack(negative_tensors)
-        labels = labels.clone().detach()
-
-        # Create the training dataset using DataLoader
-        train_dataset = TensorDataset(anchor_tensors, positive_tensors, negative_tensors, labels)
-        dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-
-        # Initialize the Siamese network and TripletLoss
-        siamese_net = SiameseNetwork(
-            embedding_dim=signature_embeddings.size(1))  # Modify as per your Siamese network architecture
-        criterion = TripletLoss(margin=1.0)
-
-        # to check if the siamese net has been initialized or not
-        # print(siamese_net)  # Print the model to see its architecture
-
-        # Training loop
-        num_epochs = 10
-        optimizer = torch.optim.Adam(siamese_net.parameters(), lr=0.001)
-        # print(optimizer)
-
-        # Train the Siamese network
-        t.train_siamese_network(siamese_net, dataloader, criterion, optimizer, num_epochs)
+    # Train the Siamese network
+    t.train_siamese_network(signature_dataloader, desired_embedding_dim, num_epochs)
 
 if __name__ == "__main__":
     main()

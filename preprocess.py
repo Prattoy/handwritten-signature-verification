@@ -20,6 +20,9 @@ class SignatureDataset(Dataset):
             image = Image.open(image_name)
 
             # Convert the grayscale image to RGB
+            # image = image.convert("L")
+
+            # Convert the grayscale image to RGB
             image = transforms.Grayscale(num_output_channels=3)(image)
 
             if self.transform:
