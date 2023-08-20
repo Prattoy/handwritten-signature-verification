@@ -65,9 +65,9 @@ def train_siamese_network(anchor_dataloader, positive_dataloader, negative_datal
             negatives = negatives.view(negatives.size(0), -1)
 
             # Assuming anchors, positives, and negatives are your input tensors
-            print("Anchors shape:", anchors.size())
-            print("Positives shape:", positives.size())
-            print("Negatives shape:", negatives.size())
+            # print("Anchors shape:", anchors.size())
+            # print("Positives shape:", positives.size())
+            # print("Negatives shape:", negatives.size())
 
             # Forward pass through the Siamese Network
             anchor_output, positive_output, negative_output = siamese_net(anchors, positives, negatives)

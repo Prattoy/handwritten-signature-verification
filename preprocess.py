@@ -19,15 +19,11 @@ class SignatureDataset(Dataset):
         if image_name.endswith(".png"):
             image = Image.open(image_name)
 
-            # Convert the grayscale image to RGB
-            # image = image.convert("L")
-
-            # Convert the grayscale image to RGB
-            image = transforms.Grayscale(num_output_channels=3)(image)
+            # Convert the grayscale image to 1-channel grayscale
+            image = image.convert("L")
 
             if self.transform:
                 image = self.transform(image)
-                # print(image.shape)
 
             return image
 
