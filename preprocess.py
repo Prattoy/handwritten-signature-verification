@@ -27,15 +27,16 @@ class SignatureDataset(Dataset):
 
             if self.transform:
                 image = self.transform(image)
+                # print(image.shape)
 
             return image
 
 
 def preprocess_data(data_folder, image_size=(128, 128), batch_size=32):
     data_transform = transforms.Compose([
-        transforms.Resize(image_size),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5], std=[0.5]),  # Corrected normalization
+        transforms.Resize(image_size),  # resizes images
+        transforms.ToTensor(),  # converts to tensor
+        # transforms.Normalize(mean=[0.5], std=[0.5]),  # normalization
     ])
 
     signature_dataset = SignatureDataset(data_folder, transform=data_transform)
