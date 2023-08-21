@@ -5,36 +5,12 @@ from transformer import extract_embeddings
 from siamese_net import SiameseNetwork
 from triplet_loss import TripletLoss
 import time
+import torch.nn.functional as f
+from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 
 
-# def create_signature_triplets(embeddings_list, margin=1.0):
-#     triplets = []
-#     labels = []
-#
-#     for embeddings in embeddings_list:
-#         num_embeddings = embeddings.shape[0]
-#
-#         for i in range(num_embeddings):
-#             anchor = embeddings[i]
-#
-#             # Choose a random positive sample (from the same person)
-#             positive_idx = random.choice([idx for idx in range(num_embeddings) if idx != i])
-#             positive = embeddings[positive_idx]
-#
-#             # Choose a random negative sample (from a different person)
-#             negative_idx = random.choice([idx for idx in range(num_embeddings) if idx != i])
-#             negative = embeddings[negative_idx]
-#
-#             # Append the triplet and corresponding label
-#             triplets.append((anchor.unsqueeze(0), positive.unsqueeze(0), negative.unsqueeze(0)))  # Unsqueeze to add batch dimension
-#             labels.append(1)
-#
-#     return triplets, torch.tensor(labels)
-
-
-def train_siamese_network(anchor_dataloader, positive_dataloader, negative_dataloader, desired_embedding_dim, num_epochs=10):
+def train_siamese_network(siamese_net, anchor_dataloader, positive_dataloader, negative_dataloader, num_epochs=10):
     # Initialize the Siamese network and TripletLoss
-    siamese_net = SiameseNetwork(embedding_dim=desired_embedding_dim, num_heads=4, num_layers=2)  # Use the SiameseNetwork with Transformer
     criterion = TripletLoss(margin=0.5)
     optimizer = torch.optim.Adam(siamese_net.parameters(), lr=0.001)
 
@@ -47,17 +23,6 @@ def train_siamese_network(anchor_dataloader, positive_dataloader, negative_datal
         for batch_idx, (anchors, positives, negatives) in enumerate(
                 zip(anchor_dataloader, positive_dataloader, negative_dataloader)):
             optimizer.zero_grad()
-
-            # # Assuming anchors, positives, and negatives are tensors
-            # anchor_sequence_length = anchors.size(0)
-            # positive_sequence_length = positives.size(0)
-            # negative_sequence_length = negatives.size(0)
-            #
-            # # Compare sequence lengths
-            # if anchor_sequence_length == positive_sequence_length == negative_sequence_length:
-            #     print("All sequence lengths are the same.")
-            # else:
-            #     print("Sequence lengths are different.")
 
             # Reshape the tensors to [batch_size, num_channels * height * width]
             anchors = anchors.view(anchors.size(0), -1)  # The -1 automatically calculates the necessary size
@@ -87,4 +52,43 @@ def train_siamese_network(anchor_dataloader, positive_dataloader, negative_datal
     end_time = time.time()
     total_time = end_time - start_time
     print(f"Total training time: {total_time:.2f} seconds")
+
+
+def test_siamese_network(siamese_net, validation_dataloader):
+    siamese_net.eval()  # Set the model to evaluation mode
+    with torch.no_grad():
+        all_true_labels = []
+        all_predicted_labels = []
+
+        for batch_idx, (anchors, positives, negatives) in enumerate(validation_dataloader):
+            # Reshape the tensors as before
+            anchors = anchors.view(anchors.size(0), -1)
+            positives = positives.view(positives.size(0), -1)
+            negatives = negatives.view(negatives.size(0), -1)
+
+            # Forward pass through the Siamese Network
+            anchor_output, positive_output, negative_output = siamese_net(anchors, positives, negatives)
+
+            # Calculate the distances
+            distance_positive = f.pairwise_distance(anchor_output, positive_output)
+            distance_negative = f.pairwise_distance(anchor_output, negative_output)
+
+            # Predicted labels
+            predicted_labels = (distance_positive < distance_negative).cpu().numpy()
+            all_predicted_labels.extend(predicted_labels)
+
+            # True labels (1 for positive pairs, 0 for negative pairs)
+            true_labels = torch.ones_like(distance_positive).cpu().numpy()
+            all_true_labels.extend(true_labels)
+
+        # Calculate precision, recall, f1-score, and accuracy
+        precision, recall, f1, _ = precision_recall_fscore_support(all_true_labels, all_predicted_labels, average='binary')
+        accuracy = accuracy_score(all_true_labels, all_predicted_labels)
+
+        print(f"Precision: {precision:.2f}")
+        print(f"Recall: {recall:.2f}")
+        print(f"F1-score: {f1:.2f}")
+        print(f"Accuracy: {accuracy:.2%}")
+
+
 
