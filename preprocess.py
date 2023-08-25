@@ -28,7 +28,7 @@ class SignatureDataset(Dataset):
             return image
 
 
-def preprocess_data(data_folder, image_size=(128, 128), batch_size=32):
+def preprocess_data(data_folder, image_size=(128, 128), batch_size=32, test=False):
     data_transform = transforms.Compose([
         transforms.Resize(image_size),  # resizes images
         transforms.ToTensor(),  # converts to tensor
@@ -38,6 +38,11 @@ def preprocess_data(data_folder, image_size=(128, 128), batch_size=32):
     signature_dataset = SignatureDataset(data_folder, transform=data_transform)
     # Filter out None elements from the signature_dataset
     signature_dataset = [signatures for signatures in signature_dataset if signatures is not None]
-    signature_dataloader = DataLoader(signature_dataset, batch_size=batch_size, shuffle=True)
+
+    if test:
+        # batch_size = len(signature_dataset)
+        signature_dataloader = signature_dataset
+    else:
+        signature_dataloader = DataLoader(signature_dataset, batch_size=batch_size, shuffle=True)
 
     return signature_dataloader

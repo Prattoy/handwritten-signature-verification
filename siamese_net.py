@@ -9,6 +9,16 @@ class SiameseNetwork(nn.Module):
         self.embedding_dim = embedding_dim
         self.batch_size = batch_size
 
+        # Define the CNN architecture
+        self.cnn = nn.Sequential(
+            nn.Conv2d(in_channels=1, out_channels=64, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2),
+            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2),
+        )
+
         # Define the architecture of the Siamese network using Transformer
         self.transformer_encoder = TransformerEncoder(
             TransformerEncoderLayer(d_model=embedding_dim, nhead=num_heads, dropout=dropout),
@@ -22,13 +32,21 @@ class SiameseNetwork(nn.Module):
         self.fc1 = nn.Linear(self.transformer_features, embedding_dim)
 
     def forward_once(self, x):
-        # x = x.long()  # Convert input to LongTensor
-        # x = self.embedding(x)
-        x = x.view(self.batch_size, 64, 256)
+        # x = x.view(self.batch_size, 64, 256)
+        # x = x.transpose(0, 1)  # Transpose dimensions to match Transformer input format
+        # x = self.transformer_encoder(x)
+        # x = x.transpose(0, 1)  # Transpose dimensions back to batch-first
+        # x = x.mean(dim=1)  # Average over sequence length to get a fixed-size representation
+        # x = F.relu(self.fc1(x))
+
+        x = self.cnn(x)
         # print(x.shape)
-        x = x.transpose(0, 1)  # Transpose dimensions to match Transformer input format
+
+        x = x.flatten(2).transpose(1, 2)  # Flatten the image features and transpose for Transformer
+        # print(x.shape)
+        # x = x.permute(0, 2, 1)
+        # print(x.shape)
         x = self.transformer_encoder(x)
-        x = x.transpose(0, 1)  # Transpose dimensions back to batch-first
         x = x.mean(dim=1)  # Average over sequence length to get a fixed-size representation
         x = F.relu(self.fc1(x))
         return x

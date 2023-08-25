@@ -24,10 +24,11 @@ def train_siamese_network(siamese_net, anchor_dataloader, positive_dataloader, n
                 zip(anchor_dataloader, positive_dataloader, negative_dataloader)):
             optimizer.zero_grad()
 
+            # print(anchors.shape)
             # Reshape the tensors to [batch_size, num_channels * height * width]
-            anchors = anchors.view(anchors.size(0), -1)  # The -1 automatically calculates the necessary size
-            positives = positives.view(positives.size(0), -1)
-            negatives = negatives.view(negatives.size(0), -1)
+            # anchors = anchors.view(anchors.size(0), -1)  # The -1 automatically calculates the necessary size
+            # positives = positives.view(positives.size(0), -1)
+            # negatives = negatives.view(negatives.size(0), -1)
 
             # Assuming anchors, positives, and negatives are your input tensors
             # print("Anchors shape:", anchors.size())
@@ -45,7 +46,9 @@ def train_siamese_network(siamese_net, anchor_dataloader, positive_dataloader, n
             optimizer.step()
 
             running_loss += loss.item()
+            # print(loss.item())
 
+        # print(len(anchor_dataloader))
         epoch_loss = running_loss / len(anchor_dataloader)  # Calculate the average loss for the epoch
         print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {epoch_loss:.4f}")
 
@@ -93,26 +96,54 @@ def test_siamese_network(siamese_net, validation_dataloader):
         print(f"Accuracy: {accuracy:.2%}")
 
 
-def test_siamese_network_2(siamese_net, anchor_signature, test_signature):
+def test_siamese_network_2(siamese_net, test_dataloader):
     siamese_net.eval()  # Set the model to evaluation mode
     with torch.no_grad():
-        anchor_signature = anchor_signature.view(1, -1)  # Reshape the anchor signature
-        test_signature = test_signature.view(1, -1)  # Reshape the test signature
+        currectly_predicted = 0
+        incurrectly_predicted = 0
 
-        # Forward pass through the Siamese Network
-        anchor_output = siamese_net.forward_once(anchor_signature)
-        test_output = siamese_net.forward_once(test_signature)
+        for anchors, positives, negatives in test_dataloader:
 
-        # Calculate the distance between anchor and test signatures
-        distance = f.pairwise_distance(anchor_output, test_output)
+            anchors = anchors.unsqueeze(0)  # Add batch dimension
+            positives = positives.unsqueeze(0)  # Add batch dimension
+            negatives = negatives.unsqueeze(0)  # Add batch dimension
+            # print(anchors.shape)
 
-        # If the distance is below a certain threshold, consider the test signature as genuine (positive)
-        # Otherwise, consider it as forged (negative)
-        threshold = 0.5
-        predicted_label = 1 if distance < threshold else 0
+            # anchor_signature = anchor_signature.view(1, -1)  # Reshape the anchor signature
+            # test_signature = test_signature.view(1, -1)  # Reshape the test signature
 
-        print(f"Distance: {distance:.4f}")
-        print(f"Predicted Label: {predicted_label}")
+            # Forward pass through the Siamese Network
+            random_number = random.randint(0, 1)
 
+            if random_number == 0:
+                anchor_output = siamese_net.forward_once(anchors)
+                test_output = siamese_net.forward_once(negatives)
+                # true_label = False
+            else:
+                anchor_output = siamese_net.forward_once(anchors)
+                test_output = siamese_net.forward_once(positives)
+                # true_label = True
+
+            # print(anchor_output)
+            # print(test_output)
+            # Calculate the distance between anchor and test signatures
+            distance = f.pairwise_distance(anchor_output, test_output)
+
+            # If the distance is below a certain threshold, consider the test signature as genuine (positive)
+            # Otherwise, consider it as forged (negative)
+            threshold = 0.5
+            predicted_label = 1 if distance < threshold else 0
+
+            print("Distance: {:.4f}".format(distance.item()))
+            print(f"Predicted Label: {predicted_label}")
+            print(f"Actual Label: {random_number}")
+
+            if predicted_label == random_number:
+                currectly_predicted += 1
+            else:
+                incurrectly_predicted += 1
+
+        print(f"Total Currrectly Predicted: {currectly_predicted}")
+        print(f"Total Incurrrectly Predicted: {incurrectly_predicted}")
 
 
