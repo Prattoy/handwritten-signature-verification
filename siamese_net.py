@@ -4,14 +4,14 @@ from torch.nn import TransformerEncoder, TransformerEncoderLayer
 
 
 class SiameseNetwork(nn.Module):
-    def __init__(self, embedding_dim, num_heads, num_layers):
+    def __init__(self, embedding_dim, batch_size, num_heads, num_layers, dropout=0.1):
         super(SiameseNetwork, self).__init__()
         self.embedding_dim = embedding_dim
+        self.batch_size = batch_size
 
         # Define the architecture of the Siamese network using Transformer
-        self.embedding = nn.Embedding(256, embedding_dim)  # Embedding layer for input signatures
         self.transformer_encoder = TransformerEncoder(
-            TransformerEncoderLayer(d_model=embedding_dim, nhead=num_heads),
+            TransformerEncoderLayer(d_model=embedding_dim, nhead=num_heads, dropout=dropout),
             num_layers=num_layers
         )
 
@@ -22,8 +22,10 @@ class SiameseNetwork(nn.Module):
         self.fc1 = nn.Linear(self.transformer_features, embedding_dim)
 
     def forward_once(self, x):
-        x = x.long()  # Convert input to LongTensor
-        x = self.embedding(x)
+        # x = x.long()  # Convert input to LongTensor
+        # x = self.embedding(x)
+        x = x.view(self.batch_size, 64, 256)
+        # print(x.shape)
         x = x.transpose(0, 1)  # Transpose dimensions to match Transformer input format
         x = self.transformer_encoder(x)
         x = x.transpose(0, 1)  # Transpose dimensions back to batch-first

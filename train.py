@@ -75,10 +75,12 @@ def test_siamese_network(siamese_net, validation_dataloader):
 
             # Predicted labels
             predicted_labels = (distance_positive < distance_negative).cpu().numpy()
+            # print(predicted_labels)
             all_predicted_labels.extend(predicted_labels)
 
             # True labels (1 for positive pairs, 0 for negative pairs)
             true_labels = torch.ones_like(distance_positive).cpu().numpy()
+            # print(true_labels)
             all_true_labels.extend(true_labels)
 
         # Calculate precision, recall, f1-score, and accuracy
@@ -89,6 +91,28 @@ def test_siamese_network(siamese_net, validation_dataloader):
         print(f"Recall: {recall:.2f}")
         print(f"F1-score: {f1:.2f}")
         print(f"Accuracy: {accuracy:.2%}")
+
+
+def test_siamese_network_2(siamese_net, anchor_signature, test_signature):
+    siamese_net.eval()  # Set the model to evaluation mode
+    with torch.no_grad():
+        anchor_signature = anchor_signature.view(1, -1)  # Reshape the anchor signature
+        test_signature = test_signature.view(1, -1)  # Reshape the test signature
+
+        # Forward pass through the Siamese Network
+        anchor_output = siamese_net.forward_once(anchor_signature)
+        test_output = siamese_net.forward_once(test_signature)
+
+        # Calculate the distance between anchor and test signatures
+        distance = f.pairwise_distance(anchor_output, test_output)
+
+        # If the distance is below a certain threshold, consider the test signature as genuine (positive)
+        # Otherwise, consider it as forged (negative)
+        threshold = 0.5
+        predicted_label = 1 if distance < threshold else 0
+
+        print(f"Distance: {distance:.4f}")
+        print(f"Predicted Label: {predicted_label}")
 
 
 
