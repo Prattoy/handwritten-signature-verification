@@ -2,7 +2,7 @@ from preprocess import preprocess_data
 from visualize import visualize_signature_images
 import train as t
 from siamese_net import SiameseNetwork
-import random
+import shap_xai as sx
 
 
 def main():
@@ -19,8 +19,8 @@ def main():
     test_negative_folder_path = "/Users/prattoymajumder/PycharmProjects/handwritten-signature-verification/triplet_dataset/test/negative"
 
     image_size = (128, 128)
-    batch_size = 16
-    num_epochs = 10
+    batch_size = 20
+    num_epochs = 5
     desired_embedding_dim = 128
     num_heads = 4
     num_layers = 4
@@ -53,7 +53,9 @@ def main():
     # Validate the Siamese network
 
     # Test the Siamese network
-    t.test_siamese_network_2(siamese_net, test_dataloader)
+    t.test_siamese_network(siamese_net, test_dataloader)
+
+    # SHAP
 
 if __name__ == "__main__":
     main()

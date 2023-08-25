@@ -57,50 +57,13 @@ def train_siamese_network(siamese_net, anchor_dataloader, positive_dataloader, n
     print(f"Total training time: {total_time:.2f} seconds")
 
 
-def test_siamese_network(siamese_net, validation_dataloader):
+def test_siamese_network(siamese_net, test_dataloader):
     siamese_net.eval()  # Set the model to evaluation mode
     with torch.no_grad():
+        correctly_predicted = 0
+        incorrectly_predicted = 0
         all_true_labels = []
         all_predicted_labels = []
-
-        for batch_idx, (anchors, positives, negatives) in enumerate(validation_dataloader):
-            # Reshape the tensors as before
-            anchors = anchors.view(anchors.size(0), -1)
-            positives = positives.view(positives.size(0), -1)
-            negatives = negatives.view(negatives.size(0), -1)
-
-            # Forward pass through the Siamese Network
-            anchor_output, positive_output, negative_output = siamese_net(anchors, positives, negatives)
-
-            # Calculate the distances
-            distance_positive = f.pairwise_distance(anchor_output, positive_output)
-            distance_negative = f.pairwise_distance(anchor_output, negative_output)
-
-            # Predicted labels
-            predicted_labels = (distance_positive < distance_negative).cpu().numpy()
-            # print(predicted_labels)
-            all_predicted_labels.extend(predicted_labels)
-
-            # True labels (1 for positive pairs, 0 for negative pairs)
-            true_labels = torch.ones_like(distance_positive).cpu().numpy()
-            # print(true_labels)
-            all_true_labels.extend(true_labels)
-
-        # Calculate precision, recall, f1-score, and accuracy
-        precision, recall, f1, _ = precision_recall_fscore_support(all_true_labels, all_predicted_labels, average='binary')
-        accuracy = accuracy_score(all_true_labels, all_predicted_labels)
-
-        print(f"Precision: {precision:.2f}")
-        print(f"Recall: {recall:.2f}")
-        print(f"F1-score: {f1:.2f}")
-        print(f"Accuracy: {accuracy:.2%}")
-
-
-def test_siamese_network_2(siamese_net, test_dataloader):
-    siamese_net.eval()  # Set the model to evaluation mode
-    with torch.no_grad():
-        currectly_predicted = 0
-        incurrectly_predicted = 0
 
         for anchors, positives, negatives in test_dataloader:
 
@@ -134,16 +97,29 @@ def test_siamese_network_2(siamese_net, test_dataloader):
             threshold = 0.5
             predicted_label = 1 if distance < threshold else 0
 
+            all_true_labels.append(random_number)
+            all_predicted_labels.append(predicted_label)
+
             print("Distance: {:.4f}".format(distance.item()))
             print(f"Predicted Label: {predicted_label}")
             print(f"Actual Label: {random_number}")
 
             if predicted_label == random_number:
-                currectly_predicted += 1
+                correctly_predicted += 1
             else:
-                incurrectly_predicted += 1
+                incorrectly_predicted += 1
 
-        print(f"Total Currrectly Predicted: {currectly_predicted}")
-        print(f"Total Incurrrectly Predicted: {incurrectly_predicted}")
+        print(f"Total Correctly Predicted: {correctly_predicted}")
+        print(f"Total Incorrectly Predicted: {incorrectly_predicted}")
+
+        # Calculate precision, recall, f1-score, and accuracy
+        precision, recall, f1, _ = precision_recall_fscore_support(all_true_labels, all_predicted_labels,
+                                                                   average='binary')
+        accuracy = accuracy_score(all_true_labels, all_predicted_labels)
+
+        print(f"Precision: {precision:.2f}")
+        print(f"Recall: {recall:.2f}")
+        print(f"F1-score: {f1:.2f}")
+        print(f"Accuracy: {accuracy:.2%}")
 
 
