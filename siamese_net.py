@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
+from torch.nn.init import xavier_uniform_
 
 
 class SiameseNetwork(nn.Module):
@@ -12,10 +13,10 @@ class SiameseNetwork(nn.Module):
         # Define the CNN architecture
         self.cnn = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=64, kernel_size=3, padding=1),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.MaxPool2d(kernel_size=2),
             nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.MaxPool2d(kernel_size=2),
         )
 
@@ -31,24 +32,15 @@ class SiameseNetwork(nn.Module):
         # Fully connected layer for producing the final embeddings
         self.fc1 = nn.Linear(self.transformer_features, embedding_dim)
 
+        # For uniform distribution of initial embeddings
+        # self._reset_parameters()
+
     def forward_once(self, x):
-        # x = x.view(self.batch_size, 64, 256)
-        # x = x.transpose(0, 1)  # Transpose dimensions to match Transformer input format
-        # x = self.transformer_encoder(x)
-        # x = x.transpose(0, 1)  # Transpose dimensions back to batch-first
-        # x = x.mean(dim=1)  # Average over sequence length to get a fixed-size representation
-        # x = F.relu(self.fc1(x))
-
         x = self.cnn(x)
-        # print(x.shape)
-
         x = x.flatten(2).transpose(1, 2)  # Flatten the image features and transpose for Transformer
-        # print(x.shape)
-        # x = x.permute(0, 2, 1)
-        # print(x.shape)
         x = self.transformer_encoder(x)
         x = x.mean(dim=1)  # Average over sequence length to get a fixed-size representation
-        x = F.relu(self.fc1(x))
+        x = F.leaky_relu(self.fc1(x))
         return x
 
     def forward(self, anchor, positive, negative):
@@ -62,3 +54,8 @@ class SiameseNetwork(nn.Module):
 
     def __str__(self):
         return f"SiameseNetwork(embedding_dim={self.embedding_dim}, num_params={self.count_parameters()})"
+
+    def _reset_parameters(self):
+        for p in self.parameters():
+            if p.dim() > 1:
+                xavier_uniform_(p)

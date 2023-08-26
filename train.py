@@ -1,18 +1,26 @@
 import torch
 import random
-from preprocess import preprocess_data
-from transformer import extract_embeddings
-from siamese_net import SiameseNetwork
 from triplet_loss import TripletLoss
 import time
 import torch.nn.functional as f
 from sklearn.metrics import precision_recall_fscore_support, accuracy_score
+import shap
+import lr_scheduler as ls
 
 
 def train_siamese_network(siamese_net, anchor_dataloader, positive_dataloader, negative_dataloader, num_epochs=10):
     # Initialize the Siamese network and TripletLoss
     criterion = TripletLoss(margin=0.5)
-    optimizer = torch.optim.Adam(siamese_net.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(siamese_net.parameters(), lr=0.00001)
+    # optimizer = torch.optim.Adam(
+    #     siamese_net.parameters(), lr=0.00, betas=(0.9, 0.98), eps=1e-9
+    # )
+    # scheduler = ls.NoamOpt(
+    #     128,
+    #     factor=1,
+    #     warmup=400,
+    #     optimizer=optimizer,
+    # )
 
     # Training loop
     start_time = time.time()
@@ -23,12 +31,6 @@ def train_siamese_network(siamese_net, anchor_dataloader, positive_dataloader, n
         for batch_idx, (anchors, positives, negatives) in enumerate(
                 zip(anchor_dataloader, positive_dataloader, negative_dataloader)):
             optimizer.zero_grad()
-
-            # print(anchors.shape)
-            # Reshape the tensors to [batch_size, num_channels * height * width]
-            # anchors = anchors.view(anchors.size(0), -1)  # The -1 automatically calculates the necessary size
-            # positives = positives.view(positives.size(0), -1)
-            # negatives = negatives.view(negatives.size(0), -1)
 
             # Assuming anchors, positives, and negatives are your input tensors
             # print("Anchors shape:", anchors.size())
@@ -43,7 +45,9 @@ def train_siamese_network(siamese_net, anchor_dataloader, positive_dataloader, n
 
             # Backward pass and optimization
             loss.backward()
-            optimizer.step()
+            # optimizer.step()
+            # scheduler.step()
+            # scheduler.optimizer.zero_grad()
 
             running_loss += loss.item()
             # print(loss.item())
@@ -72,23 +76,16 @@ def test_siamese_network(siamese_net, test_dataloader):
             negatives = negatives.unsqueeze(0)  # Add batch dimension
             # print(anchors.shape)
 
-            # anchor_signature = anchor_signature.view(1, -1)  # Reshape the anchor signature
-            # test_signature = test_signature.view(1, -1)  # Reshape the test signature
-
-            # Forward pass through the Siamese Network
+            # Generate random number for positive and negative
             random_number = random.randint(0, 1)
 
             if random_number == 0:
                 anchor_output = siamese_net.forward_once(anchors)
                 test_output = siamese_net.forward_once(negatives)
-                # true_label = False
             else:
                 anchor_output = siamese_net.forward_once(anchors)
                 test_output = siamese_net.forward_once(positives)
-                # true_label = True
 
-            # print(anchor_output)
-            # print(test_output)
             # Calculate the distance between anchor and test signatures
             distance = f.pairwise_distance(anchor_output, test_output)
 
@@ -100,9 +97,9 @@ def test_siamese_network(siamese_net, test_dataloader):
             all_true_labels.append(random_number)
             all_predicted_labels.append(predicted_label)
 
-            print("Distance: {:.4f}".format(distance.item()))
-            print(f"Predicted Label: {predicted_label}")
-            print(f"Actual Label: {random_number}")
+            # print("Distance: {:.4f}".format(distance.item()))
+            # print(f"Predicted Label: {predicted_label}")
+            # print(f"Actual Label: {random_number}")
 
             if predicted_label == random_number:
                 correctly_predicted += 1

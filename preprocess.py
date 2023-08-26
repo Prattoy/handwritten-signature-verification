@@ -43,6 +43,6 @@ def preprocess_data(data_folder, image_size=(128, 128), batch_size=32, test=Fals
         # batch_size = len(signature_dataset)
         signature_dataloader = signature_dataset
     else:
-        signature_dataloader = DataLoader(signature_dataset, batch_size=batch_size, shuffle=True)
+        signature_dataloader = DataLoader(signature_dataset, batch_size=batch_size, shuffle=False)
 
     return signature_dataloader
