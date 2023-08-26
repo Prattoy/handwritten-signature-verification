@@ -23,12 +23,14 @@ def main():
     test_positive_folder_path = "/Users/prattoymajumder/PycharmProjects/handwritten-signature-verification/triplet_dataset/test/positive"
     test_negative_folder_path = "/Users/prattoymajumder/PycharmProjects/handwritten-signature-verification/triplet_dataset/test/negative"
 
-    image_size = (128, 128)
-    batch_size = 10
-    num_epochs = 5
+    image_size = (150, 150)
+    batch_size = 16
+    num_epochs = 10
     desired_embedding_dim = 128
     num_heads = 4
     num_layers = 4
+    margin = 0.5
+    lr = 0.00001
 
     # preprocess data
     train_anchor_dataloader = preprocess_data(train_anchor_folder_path, image_size=image_size, batch_size=batch_size)
@@ -60,7 +62,7 @@ def main():
 
     # Train the Siamese network
     t.train_siamese_network(siamese_net, train_anchor_dataloader, train_positive_dataloader, train_negative_dataloader,
-                            num_epochs)
+                            margin, lr, num_epochs)
 
     # Validate the Siamese network
 

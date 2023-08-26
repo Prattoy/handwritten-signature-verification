@@ -8,10 +8,10 @@ import shap
 import lr_scheduler as ls
 
 
-def train_siamese_network(siamese_net, anchor_dataloader, positive_dataloader, negative_dataloader, num_epochs=10):
+def train_siamese_network(siamese_net, anchor_dataloader, positive_dataloader, negative_dataloader, margin, lr, num_epochs=10):
     # Initialize the Siamese network and TripletLoss
-    criterion = TripletLoss(margin=0.5)
-    optimizer = torch.optim.Adam(siamese_net.parameters(), lr=0.00001)
+    criterion = TripletLoss(margin=margin)
+    optimizer = torch.optim.Adam(siamese_net.parameters(), lr=lr)
     # optimizer = torch.optim.Adam(
     #     siamese_net.parameters(), lr=0.00, betas=(0.9, 0.98), eps=1e-9
     # )
