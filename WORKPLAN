@@ -75,5 +75,6 @@ and iterate based on the evaluation results. Regularly validate and refine the m
 i. Dataset should not be used in any published papers before
 ii. Need to use a hybrid model (Siamese + transformer)
 iii. Offline
-iv. Few shot
+iv. One shot
 v. Need to use XAI (Shap)
+vi. k-cross validation
