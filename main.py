@@ -38,9 +38,9 @@ def main():
     train_negative_dataloader = preprocess_data(train_negative_folder_path, image_size=image_size, batch_size=batch_size)
 
     # Visualize the first batch from each dataloader
-    # vpi.visualize_batch(train_anchor_dataloader, 9)
-    # vpi.visualize_batch(train_positive_dataloader, 9)
-    # vpi.visualize_batch(train_negative_dataloader, 9)
+    # vpi.visualize_batch(train_anchor_dataloader, 0)
+    # vpi.visualize_batch(train_positive_dataloader, 0)
+    # vpi.visualize_batch(train_negative_dataloader, 0)
 
     # validate_anchor_dataloader = preprocess_data(validate_anchor_folder_path, image_size=image_size, batch_size=batch_size)
     # validate_positive_dataloader = preprocess_data(validate_positive_folder_path, image_size=image_size, batch_size=batch_size)
@@ -51,16 +51,16 @@ def main():
     test_negative_dataloader = preprocess_data(test_negative_folder_path, image_size=image_size, test=True)
     test_dataloader = zip(test_anchor_dataloader, test_positive_dataloader, test_negative_dataloader)
     # print(test_anchor_dataloader[0])
-    # vpi.visualize_batch(test_anchor_dataloader, 9)
-    # vpi.visualize_batch(test_positive_dataloader, 9)
-    # vpi.visualize_batch(test_negative_dataloader, 9)
+    # vpi.visualize_batch(test_anchor_dataloader, 0)
+    # vpi.visualize_batch(test_positive_dataloader, 0)
+    # vpi.visualize_batch(test_negative_dataloader, 0)
     num_batches = len(train_anchor_dataloader)
     print(f"Number of batches in signature_dataloader: {num_batches}")
 
     siamese_net = SiameseNetwork(embedding_dim=desired_embedding_dim, batch_size=batch_size, num_heads=num_heads,
                                  num_layers=num_layers)  # Use the SiameseNetwork with Transformer
-
-    # Train the Siamese network
+    #
+    # # Train the Siamese network
     t.train_siamese_network(siamese_net, train_anchor_dataloader, train_positive_dataloader, train_negative_dataloader,
                             margin, lr, num_epochs)
 
