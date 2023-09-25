@@ -15,7 +15,7 @@ Group Number:
 
 Group Members:
 19166005 Dipayan Sen Gupta
-23166005 Alvin Rahul Hore
-23366039 Mashfurah Afiat
-23166028 MD.Touhidul Islam
 22266019 Prattoy Majumder
+23166005 Alvin Rahul Hore
+23166028 Md. Touhidul Islam
+23366039 Mashfurah Afiat
